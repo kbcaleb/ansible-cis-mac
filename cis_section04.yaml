@@ -1,0 +1,22 @@
+---
+- name: 4.1 Disable Bonjour advertising service (Scored)
+  shell: defaults write /Library/Preferences/com.apple.mDNSResponder.plist AlwaysAppendSearchDomains -bool YES
+  become: yes
+
+# - name: 4.2 Enable "Show Wi-Fi status in menu bar" (Scored)
+  
+# - name: 4.3 Create network specific locations (Not Scored)
+
+- name: 4.4 Ensure http server is not running (Scored)
+  shell: apachectl stop && defaults write /System/Library/LaunchDaemons/org.apache.httpd Disabled -bool true
+  become: yes
+  ignore_errors: yes
+
+- name: 4.5 Ensure ftp server is not running (Scored)
+  shell: launchctl unload -w /System/Library/LaunchDaemons/ftp.plist
+  become: yes
+
+- name: 4.6 Ensure nfs server is not running (Scored)
+  shell: nfsd disable && rm /etc/export
+  become: yes
+  ignore_errors: yes

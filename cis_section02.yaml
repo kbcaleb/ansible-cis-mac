@@ -1,0 +1,104 @@
+---
+- name: 2.1.1 Turn off Bluetooth, if no paired devices exist (Scored)
+  shell: defaults write /Library/Preferences/com.apple.Bluetooth ControllerPowerState -int 0 && killall -HUP blued
+  become: yes
+
+- name: 2.1.2 Turn off Bluetooth "Discoverable" mode when not pairing devices (Scored)
+  shell: /usr/sbin/system_profiler SPBluetoothDataType | grep -i discoverable
+
+- name: 2.1.3 Show Bluetooth status in menu bar (Scored)
+  shell: defaults write com.apple.systemuiserver menuExtras -array-add "/System/Library/CoreServices/Menu Extras/Bluetooth.menu"
+
+- name: 2.2.1 Enable "Set time and date automatically" (Not Scored)
+  shell: systemsetup -setnetworktimeserver time.apple.com && systemsetup –setusingnetworktime on
+  become: yes
+
+- name: 2.2.2 Ensure time set is within appropriate limits (Scored)
+  shell: for i in `systemsetup -getnetworktimeserver | awk '{ print $4 }'`; do ntpdate -sv $i; done
+  become: yes
+  ignore_errors: yes
+
+- name: 2.2.3 Restrict NTP server to loopback interface (Scored)
+  lineinfile:
+    dest: /etc/ntp-restrict.conf
+    line: 'restrict lo interface ignore wildcard interface listen lo'
+    state: present
+  become: yes
+
+- name: 2.3.1 Set an inactivity interval of 20 minutes or less for the screen saver (Scored)
+  shell: defaults -currentHost write com.apple.screensaver idleTime -int 600
+
+#- name: 2.3.2 Secure screen saver corners (Scored) Disable any retunred 6
+#  shell: defaults read ~/Library/Preferences/com.apple.dock | grep -i corner
+
+- name: 2.3.3 Verify Display Sleep is set to a value larger than the Screen Saver (Not Scored)
+  shell: pmset -c displaysleep 610
+  become: yes
+
+#- name: 2.3.4 Set a screen corner to Start Screen Saver (Scored)
+
+- name: 2.4.1 Disable Remote Apple Events (Scored)
+  shell: systemsetup -setremoteappleevents off
+  become: yes
+
+# - name: 2.4.2 Disable Internet Sharing (Scored)
+# - name: 2.4.3 Disable Screen Sharing (Scored)
+# - name: 2.4.4 Disable Printer Sharing (Scored)
+
+#- name: 2.4.5 Disable Remote Login (Scored)
+#  expect:
+#    command: systemsetup -setremotelogin off
+#    responses:
+#      (?i)\(yes\/no\)\? yes
+#  become: yes
+
+# - name: 2.4.6 Disable DVD or CD Sharing (Scored)
+# - name: 2.4.7 Disable Bluetooth Sharing (Scored)
+
+- name: 2.4.8 Disable File Sharing (Scored)
+  shell: launchctl unload -w /System/Library/LaunchDaemons/com.apple.AppleFileServer.plist && launchctl unload -w /System/Library/LaunchDaemons/com.apple.smbd.plist
+  become: yes
+
+# - name: 2.4.9 Disable Remote Management (Scored)
+
+- name: 2.5.1 Disable "Wake for network access" (Scored)
+  shell: pmset -a womp 0
+  become: yes
+
+- name: 2.5.2 Disable sleeping the computer when connected to power (Scored)
+  shell: pmset -c sleep 0
+  become: yes
+
+# - name: 2.6.1 Enable FileVault (Scored)
+- name: 2.6.2 Enable Gatekeeper (Scored)
+  shell: spctl --master-enable
+  become: yes
+
+#- name: 2.6.3 Enable Firewall (Scored)
+#  shell: defaults write /Library/Preferences/com.apple.alf globalstate - int  
+
+# - name: 2.6.4 Enable Firewall Stealth Mode (Scored)
+#   shell: /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on
+#   become: yes
+
+# - name: 2.6.5 Review Application Firewall Rules (Scored)
+
+- name: 2.6.6 Enable Location Services (Not Scored)
+  shell: launchctl load /System/Library/LaunchDaemons/com.apple.locationd.plist
+  become: yes
+
+# - name: 2.6.7 Monitor Location Services Access (Not Scored)
+# - name: 2.7.1 iCloud configuration (Not Scored)
+# - name: 2.7.2 iCloud keychain (Not Scored)
+# - name: 2.7.3 iCloud Drive (Not Scored)
+# - name: 2.7.4 iCloud Drive Document sync (Scored)
+# - name: 2.7.5 iCloud Drive Desktop sync (Scored)
+# - name: 2.8 Time Machine
+# - name: 2.8.2 Time Machine Volumes Are Encrypted (Not Scored)
+# - name: 2.9 Pair the remote control infrared receiver if enabled (Scored)
+# - name: 2.10 Enable Secure Keyboard Entry in terminal.app (Scored)
+# - name: 2.11 Java 6 is not the default Java runtime (Scored)
+# - name: 2.12 Securely delete files as needed (Not Scored)
+
+
+  

@@ -1,0 +1,73 @@
+---
+- name: 5.1.1 Secure Home Folders (Scored)
+  shell: for i in `ls /Users/`; do chmod -R og-rwx /Users/$i; done
+  become: yes
+
+- name: 5.1.2 Check System Wide Applications for appropriate permissions (Scored)
+  shell: for i in `sudo find /Applications -iname "*\.app" -type d -perm -2 -ls`; do chmod -R o-w /Applications/$i; done
+  become: yes
+
+- name: 5.1.3 Check System folder for world writable files (Scored)
+  shell: for i in `find /System -type d -perm -2 -ls | grep -v "Public/Drop Box"`; do chmod -R o-w $i; done
+  become: yes
+
+- name: 5.1.4 Check Library folder for world writable files (Scored)
+  shell: for i in `find /Library -type d -perm -2 -ls | grep -v Caches`; do chmod -R o-w $i; done
+  become: yes
+
+# - name: 5.2.1 Configure account lockout threshold (Scored)
+# - name: 5.2.2 Set a minimum password length (Scored)
+# - name: 5.2.3 Complex passwords must contain an Alphabetic Character (Scored)
+# - name: 5.2.4 Complex passwords must contain a Numeric Character (Scored)
+# - name: 5.2.5 Complex passwords must contain a Special Character (Scored)
+# - name: 5.2.6 Complex passwords must uppercase and lowercase letters (Scored)
+# - name: 5.2.7 Password Age (Scored)
+# - name: 5.2.8 Password History (Scored)
+
+- name: 5.3 Reduce the sudo timeout period (Scored)
+  lineinfile:
+    dest: /etc/sudoers
+    line: 'Defaults timestamp_timeout=0'
+    state: present
+  become: yes
+
+# - name: 5.4 Automatically lock the login keychain for inactivity (Scored)
+# - name: 5.5 Ensure login keychain is locked when the computer sleeps (Scored)
+
+- name: 5.6 Enable OCSP and CRL certificate checking (Scored)
+  shell: defaults write com.apple.security.revocation CRLStyle -string RequireIfPresent && defaults write com.apple.security.revocation OCSPStyle -string RequireIfPresent
+
+# - name: 5.7 Do not enable the "root" account (Scored)
+
+- name: 5.8 Disable automatic login (Scored)
+  shell: defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser
+  become: yes
+  ignore_errors: yes
+
+- name: 5.9 Require a password to wake the computer from sleep or screen saver (Scored)
+  shell: defaults write com.apple.screensaver askForPassword -int 1
+  become: yes
+
+# - name: 5.10 Require an administrator password to access system-wide preferences (Scored)
+
+- name: 5.11 Disable ability to login to another user's active and locked session (Scored)
+  lineinfile:
+    dest: /etc/pam.d/screensaver
+    regexp: 'pam_group\.so no\_warn group\=admin\,wheel fail\_safe'
+    line: 'pam_group.so no_warn group=wheel fail_safe'
+  become: yes
+
+- name: 5.12 Create a custom message for the Login Screen (Scored)
+  shell: defaults write /Library/Preferences/com.apple.loginwindow LoginwindowText "This system is reserved for authorized use only, and all use may be monitored"
+  become: yes
+
+# - name: 5.13 Create a Login window banner (Scored)
+# - name: 5.14 Do not enter a password-related hint (Not Scored)
+# - name: 5.15 Disable Fast User Switching (Not Scored)
+# - name: 5.16 Secure individual keychains and items (Not Scored)
+# - name: 5.17 Create specialized keychains for different purposes (Not Scored)
+
+# - name: 5.18 System Integrity Protection status (Scored)
+# - name: 5.19 Install an approved tokend for smartcard authentication (Scored)
+
+
